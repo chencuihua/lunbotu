@@ -104,7 +104,22 @@ $(function(){
 	alert('自运行的匿名函数');
 })
 */
-(function(){
+(function($){
+	//本函数每次调用只负责一个轮播图的功能
+	//也就是说只会产生一个轮播图,这个函数的作用域只能分配一个轮播图
+	//所以要求在调用本函数的时候务必把当前轮播图的跟标签传递过来
+	//这里的形参 ele 就是某个轮播的跟标签
+	var slide = function(ele){
+		//转化为 jquery 标签对象
+		var $ele = $(ele);
+		//默认设置选项
+		var setting = {
+			//控制刚开炸开时间
+			delay:1000,
+			//控制interval时间(轮播速度)
+			speed:2000
+		};
+		//规定好每张图片处于的位置和状态
 	var states = [
                 {ZIndex:1,width:120,height:150,top:69,left:134,ZOpacity:0.2},
                 {ZIndex:2,width:130,height:170,top:59,left:0,ZOpacity:0.5},
@@ -115,62 +130,91 @@ $(function(){
                 {ZIndex:1,width:120,height:150,top:69,left:500,ZOpacity:0.2}
             ];
 
-var lis = $('#box li');
+		var lis = $ele.find('li');
 //让每个 li 对应上面 states 的每一个状态
-function move(){
-	lis.each(function(index,ele){
-		var state = states[index];
-		$(ele).css('z-index',state.ZIndex).finish().animate(state,1000).find('img').css('opacity',state.ZOpacity);
-	});
-}
+		function move(){
+			lis.each(function(index,value){
+				var state = states[index];
+				$(value).css('z-index',state.ZIndex).finish().animate(state,1000).find('img').css('opacity',state.ZOpacity);
+			});
+		}
 //让 li 从正中间展开
-move();
+		move();
 
 //点击下一张，让轮播图发生偏移
-function next(){
-	//原理:把数组最后一个元素移到数组第一位(以下等价)
-//	var obj = states.pop();  //删除最后一个元素并返回
-//	states.unshift(obj);     //将获得的元素插到最前面
-	states.unshift(states.pop());
-	move();
-}
+		function next(){
+			//原理:把数组最后一个元素移到数组第一位(以下等价)
+		//	var obj = states.pop();  //删除最后一个元素并返回
+		//	states.unshift(obj);     //将获得的元素插到最前面
+			states.unshift(states.pop());
+			move();
+		}
 
 //点击上一张，让轮播图发生偏移
-function prev(){
-	//原理:把数组第一个元素移到数组最后一位(以下等价)
-//	var obj = states.shift();  //删除第一个元素并返回
-//	states.push(obj);     //将获得的元素插到最后面
-	states.push(states.shift());
-	move();
-}
+		function prev(){
+			//原理:把数组第一个元素移到数组最后一位(以下等价)
+		//	var obj = states.shift();  //删除第一个元素并返回
+		//	states.push(obj);     //将获得的元素插到最后面
+			states.push(states.shift());
+			move();
+		}
 
 //点击下一张
-$('#box .next').click(function(){
-	next();
-});
+		$ele.find('.zy-next').click(function(){
+			next();
+		});
 
 //点击上一张
-$('#box .prev').click(function(){
-	prev();
-});
+		$ele.find('.zy-prev').click(function(){
+			prev();
+		});
 
 //自动播放
-var interval = null;
-function autoplay(){
-interval=setInterval(function(){
-	next();
-},2000);
-}
-autoplay();
-//鼠标悬停停止轮播
-$('#box li').add('#box section').hover(function(){
-	clearInterval(interval);
-},function(){
-	autoplay();
-});
+		var interval = null;
+		function autoplay(){
+		interval=setInterval(function(){
+			next();
+		},setting.speed);
+		}
+		autoplay();
+		//鼠标悬停停止轮播
+		$ele.find('section').add(lis).hover(function(){
+			clearInterval(interval);
+		},function(){
+			autoplay();
+		});
+			
+		}
+	
+	//找到要轮播的轮播图的根标签，调用slide方法
+	//slide($('.zy-slide').eq(0));
+	$.fn.zySlide = function(){
+		$(this).each(function(i,ele){
+			slide(ele);
+		})
+	}
+})(jQuery)
 
-})()
 
+/*
+ * 用jquery封装插件的几种写法:
+ * 
+ * 插件类写法:
+ * $.fn.customFun = function(){
+ * 	自定义插件的代码
+ * }
+ * 用法:
+ * $('selector').customFun();
+ * 
+ * 
+ * 工具类写法:
+ * $.customFun = function(){
+ * 	自定义工具类的代码
+ * }
+ * 用法:
+ * $.customFun();
+ * 
+ */
 
  /* 
   轮播图能封装成插件吗？会产生什么问题？
