@@ -3,8 +3,8 @@
 jQuery.noConflict();
 
 //zySlide()只要轮播图的跟标签(任何选择器)
-jQuery('.zy-slide').zySlide();
-//jQuery('.zy-slide').zySlide();
+jQuery('.slide').zySlide({speed:1000});
+jQuery('#slide').zySlide({delay:2000,speed:5000});
 
 
 
